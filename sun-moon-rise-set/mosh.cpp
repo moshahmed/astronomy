@@ -42,11 +42,10 @@ void set_cd_today(CalData &cd) {
 }
 
 void set_cd(CalData &cd, ConfigFile &cf){
-  char cfgFile[256];
-  char* pCfgFile = cfgFile;
-  strcpy( cfgFile, "DarkCal.cfg");
 
-  if ( ConfigFile::OK != cf.filename( pCfgFile ) ) exit(1);
+  if (cf.status() == cf.NO_ENTRIES )
+    if ( ConfigFile::OK != cf.filename( "DarkCal.cfg" ) )
+      exit(1);
   if ( cf.value( "longitude" ) )
     cd.loc.setLongitude( cf.dblValue( "longitude" ) );
 
@@ -94,7 +93,6 @@ int main(int argc, char** argv) {
   CalData cd;
   ConfigFile cf;
   set_cd_today(cd);
-  set_cd(cd, cf);
    
   static const double hourFraction = 1./24.;
   double tzAdj = (double)cd.loc.timeZone() * hourFraction;
@@ -104,7 +102,8 @@ int main(int argc, char** argv) {
   double jd1 = DateOps::dmyToDay( 1, cd.month, cd.year ) ;
   double jd2 = jd1 + num_days;
 
-  // Parse command line, eg. -from: 2014/01/10 -to 2015/12/31
+  // Parse command line, eg. -from 2014/01/10 -to 2015/12/31
+  //   '-days N'  is '-from $today -to $today+N'
   for(int i=1;i<argc;i++){ 
     if (!strcmp(argv[i],"--"))
       break;
@@ -117,6 +116,11 @@ int main(int argc, char** argv) {
     if (!strcmp(argv[i],"-to") && (++i)<argc) {
       sscanf(argv[i], "%d/%d/%d", &year, &month, &day);
       jd2 = DateOps::dmyToDay( day, month, year ) ;
+      continue;
+    }
+    if (!strcmp(argv[i],"-days") && (++i)<argc) {
+      sscanf(argv[i], "%d", &num_days);
+      jd2 = jd1 + num_days;
       continue;
     }
     if (!strcmp(argv[i],"-lat") && (++i)<argc) {
@@ -140,23 +144,31 @@ int main(int argc, char** argv) {
     }
     if (!strcmp(argv[i],"-cfg") && (++i)<argc) {
       cf.filename(argv[i]);
-      set_cd(cd, cf);
       continue;
     }
-    if (!strcmp(argv[i],"-h")){
-      fprintf(stderr, "Usage: cmd -from 2014/01/01 -to 2014/12/31\\\n"
+    if ( !strcmp(argv[i],"-h") || !strcmp(argv[i],"-?")){
+      fprintf(stderr, 
+        "Usage: cmd -from 2014/01/01 -to 2014/12/31\\\n"
+        "  -days 1 (for todays data) \\\n"
         "  -cfg file.cfg\\\n"
         "  -lat 12.887261 -lon 74.831657 -tz +5.5\\\n"
-        "  -city Mangalore,India\n");
+        "  -city Mangalore,India\n"
+        "  -h -? -verbose -debug \\\n"
+        );
       exit(0);
     }
     if (!strcmp(argv[i],"-v")){
       verbose++;
       continue;
     }
+    if (!strcmp(argv[i],"-debug")){
+      ConfigFile::debug=1;
+      continue;
+    }
     fprintf(stderr, "Cannot parse option argv[%d] %s\n", i, argv[i]);
     exit(1);
   }
+  set_cd(cd, cf);
 
   for (double jd=jd1; jd < jd2; jd+=1.) {
     long int year;

@@ -12,3 +12,5 @@
     Sunset sunrise moonrise moonset moon phase 
     Exact match (to the minute) with google calculations.
 
+2016-02-01 Mon 21:34
+  Added -days N, expands to -from $today -to $today+N

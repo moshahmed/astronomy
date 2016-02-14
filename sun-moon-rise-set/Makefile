@@ -11,13 +11,19 @@ DC = $(DC_BASE).exe
 CPPFLAGS = $(DEBUG) -ffast-math -Wall
 TMPOUT=$(TMP)/m.txt
 
+YEAR := $(shell date +%Y)
+YEAR2 := $(shell date -d "+2 year" +%Y)
+
 cal2:: $(ALL_SRCS) Astro.a ConfigFile.o
+	rm -fv ./sun-rise-set.exe
 	$(CXX) $(CPPFLAGS) -o sun-rise-set.exe mosh.cpp Astro.a ConfigFile.o ;\
-	./sun-rise-set.exe -from 2014/01/01 -to 2016/05/09 > $(TMPOUT) ;\
+	./sun-rise-set.exe -from $(YEAR)/01/01 -to $(YEAR2)/05/09 > $(TMPOUT) ;\
 	echo "File $(TMPOUT) is" ;\
 	head -8 $(TMPOUT) ; echo ... ; \
 	grep -A 1 -B 1 $$(date +%Y/%m/%d) $(TMPOUT) ; echo ... ; \
 	tail -2 $(TMPOUT) ;\
+	./sun-rise-set.exe -days 1
+
 
 cal:: test
 
@@ -54,9 +60,9 @@ clean:
 
 test:: $(DC) tags $(wildcard *.cfg)
 	# ./DarkCal $$(date +"%m") $$(date +"%Y")
-	@output=mlr-2014-2020.txt ;\
+	@output=mlr-$(YEAR)-2020.txt ;\
 	echo "Writing $$output" ;\
-	for year in `seq 2014 2016` ;do \
+	for year in `seq $(YEAR) $(YEAR2)` ;do \
 	  echo DarkCal for year $$year 1>&2 ;\
 	  echo "{{ YEAR-$$year" ;\
 	  for month in `seq 1 12` ;do \
