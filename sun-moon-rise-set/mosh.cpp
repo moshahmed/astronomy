@@ -35,10 +35,13 @@ void set_cd_today(CalData &cd) {
   struct tm *today;
   time( &ltime );
   today = localtime( &ltime );
+  cd.day = today->tm_mday;
   cd.month = 1 + today->tm_mon;
   cd.year = 1900 + today->tm_year;
-  if (verbose>0)
-    fprintf(stderr, "Using today's date %04d/%02d\n", cd.year, cd.month);  
+  if (verbose>0) {
+    fprintf(stderr, "Using today's date %04d/%02d/%02d\n",
+      cd.year, cd.month, cd.day);
+  }
 }
 
 void set_cd(CalData &cd, ConfigFile &cf){
@@ -94,16 +97,13 @@ int main(int argc, char** argv) {
   ConfigFile cf;
   set_cd_today(cd);
    
-  static const double hourFraction = 1./24.;
-  double tzAdj = (double)cd.loc.timeZone() * hourFraction;
-
   // Default dates for calendar:
   int num_days = (int)(365.25*2.);
   double jd1 = DateOps::dmyToDay( 1, cd.month, cd.year ) ;
   double jd2 = jd1 + num_days;
 
   // Parse command line, eg. -from 2014/01/10 -to 2015/12/31
-  //   '-days N'  is '-from $today -to $today+N'
+  //   '-days N'  is '-from 01/mm/yyyy -to $today+N'
   for(int i=1;i<argc;i++){ 
     if (!strcmp(argv[i],"--"))
       break;
@@ -118,9 +118,16 @@ int main(int argc, char** argv) {
       jd2 = DateOps::dmyToDay( day, month, year ) ;
       continue;
     }
+    if (!strcmp(argv[i],"-today")) {
+      jd1 = DateOps::dmyToDay( cd.day, cd.month, cd.year ) ;
+      num_days=1;
+      jd2 = jd1 + num_days;
+      continue;
+    }
     if (!strcmp(argv[i],"-days") && (++i)<argc) {
       sscanf(argv[i], "%d", &num_days);
       jd2 = jd1 + num_days;
+      // fprintf(stderr,"num_days=%d\n",num_days);
       continue;
     }
     if (!strcmp(argv[i],"-lat") && (++i)<argc) {
@@ -148,17 +155,21 @@ int main(int argc, char** argv) {
     }
     if ( !strcmp(argv[i],"-h") || !strcmp(argv[i],"-?")){
       fprintf(stderr, 
-        "Usage: cmd -from 2014/01/01 -to 2014/12/31\\\n"
-        "  -days 1 (for todays data) \\\n"
-        "  -cfg file.cfg\\\n"
-        "  -lat 12.887261 -lon 74.831657 -tz +5.5\\\n"
-        "  -city Mangalore,India\n"
-        "  -h -? -verbose -debug \\\n"
+        "Usage: cmd -from 2014/01/01 -to 2014/12/31\n"
+        "  -today  .. for today's sunrise sunset moonrise moonset\n"
+        "  -days 1 .. for number of days\n"
+        "  -cfg file.cfg .. read config file\n"
+        "  -lat 12.887261 -lon 74.831657 -tz +5.5 .. latitude longitude timezone\n"
+        "  -city Mangalore,India       .. location string\n"
+        "  -h -? .. help \n"
+        "  -v    .. verbose info\n"
+        "  -debug\n"
         );
       exit(0);
     }
     if (!strcmp(argv[i],"-v")){
       verbose++;
+      fprintf(stderr,"verbose=%d\n",verbose);
       continue;
     }
     if (!strcmp(argv[i],"-debug")){
@@ -170,14 +181,18 @@ int main(int argc, char** argv) {
   }
   set_cd(cd, cf);
 
+  static const double hourFraction = 1./24.;
+  double tzAdj = (double)cd.loc.timeZone() * hourFraction;
+
+  int count=0;
   for (double jd=jd1; jd < jd2; jd+=1.) {
     long int year;
     int month, day;
     DateOps::dayToDmy( (long int) jd, &day, &month, &year);
 
-    if ((month==1 && day==1) || jd == jd1)
+    if ((month==1 && day==1) || jd == jd1 || (count++)==0)
       title_year(cd, cf, jd1);
-    if (day==1)
+    if (day==1 || (count++)==0)
       title_month(month, year);
     TimePair sunRS, moonRS;
 

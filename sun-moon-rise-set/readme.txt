@@ -14,3 +14,6 @@
 
 2016-02-01 Mon 21:34
   Added -days N, expands to -from $today -to $today+N
+
+2016-03-13 Sun 18:54
+  Fixed bug: init tz after reading cfg file.
