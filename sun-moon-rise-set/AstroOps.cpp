@@ -177,7 +177,8 @@ void AstroOps::nutation( double t, double* pDPhi, double* pDEpsilon )
   double t2 = t * t;
   double t3 = t2 * t;
 
-  for( int i=0; i<5; i++ ) {
+  int i;
+  for( i=0; i<5; i++ ) {
     terms[i] = linearPart[i] * t + coefficients[i][0] / 100000.;
     terms[i] += t2 * coefficients[i][1] * 1.e-7;
     terms[i] += t3 / coefficients[i][2];
@@ -193,7 +194,7 @@ void AstroOps::nutation( double t, double* pDPhi, double* pDEpsilon )
   if( pDEpsilon )
     *pDEpsilon = (92025. + 8.9 * t) * cos( terms[4] );
 
-  for( int i=0; i<N_NUTATION_COEFFS; i++ ) {
+  for( i=0; i<N_NUTATION_COEFFS; i++ ) {
     double totalArg = 0.;
     int mult = args[i][0];
 

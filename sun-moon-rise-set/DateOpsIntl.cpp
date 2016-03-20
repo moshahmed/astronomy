@@ -305,10 +305,11 @@ void DateOps::getJalaliYearData( long year, YearEndDays& daysInYear, MonthDays& 
     * The next five have 30 days.
     * The last month has 29 days in ordinary years,  30 in leap years.
     */
-   for( int i=0; i<6; i++ )
+    int i;
+   for( i=0; i<6; i++ )
       md[i] = 31;
 
-   for( int i=6; i<11; i++ )
+   for( i=6; i<11; i++ )
       md[i] = 30;
 
    md[11] = ( daysInYear[1] - daysInYear[0] - 336L );

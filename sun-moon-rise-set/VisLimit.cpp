@@ -42,7 +42,7 @@ well below the horizon;  I found that this didn't make testing
 contributions from those objects any easier,  so I put them where they
 could contribute more brightness.
 
-At some point when I have the time,  I'll break out the main( ) portion,
+At some point when I have the time,  I'll break out the main portion,
 tack in the code for CCD mag limits on page 121 of the same magazine,
 and make proper header files.
 
@@ -264,8 +264,7 @@ int VisLimit::computeSkyBrightness(AngularBrightnessData& abd)
 #ifdef TEST_PROGRAM
 #include <stdio.h>
 
-int main( int argc, char **argv)
-{
+int main( int argc, char **argv) {  /* #IF TEST_PROGRAM */
    if (argc < 2) {
      fprintf( stderr, "usage: %s <zenith angle>\n", argv[0] );
      return 1;

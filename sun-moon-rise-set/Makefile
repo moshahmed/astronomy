@@ -2,44 +2,61 @@
 
 ALL_SRCS=$(wildcard *.c *.cpp *.c++ *.cxx *.h *.hpp *.hxx *.cfg Makefile)
 
+LIB_SRC=AstroOps.cpp DateOps.cpp DateOpsIntl.cpp Lunar.cpp MathOps.cpp PlanetData.cpp Pluto.cpp RiseSet.cpp Vsop.cpp
+
 LIBOBJS = AstroOps.o DateOps.o DateOpsIntl.o PlanetData.o Lunar.o Pluto.o MathOps.o RiseSet.o Vsop.o
-#VsopData.o
-LIB = Astro.a
-DC_BASE = DarkCal
-DC = $(DC_BASE).exe
+
+ASTRO_LIB = Astro.a
+MAIN_PROG = DarkCal
+EXE_NAME = $(MAIN_PROG).exe
 #DEBUG = -g
-CPPFLAGS = $(DEBUG) -ffast-math -Wall
+# CPPFLAGS = $(DEBUG) -ffast-math -Wall
+
+CPPFLAGS = $(DEBUG) -Wall
 TMPOUT=$(TMP)/m.txt
 
 YEAR := $(shell date +%Y)
 YEAR2 := $(shell date -d "+2 year" +%Y)
 
-cal2:: $(ALL_SRCS) Astro.a ConfigFile.o
-	rm -fv ./sun-rise-set.exe
-	$(CXX) $(CPPFLAGS) -o sun-rise-set.exe mosh.cpp Astro.a ConfigFile.o ;\
-	./sun-rise-set.exe -from $(YEAR)/01/01 -to $(YEAR2)/05/09 > $(TMPOUT) ;\
+vc6::
+	cl.exe /W3 mosh.cpp ConfigFile.cpp AstroOps.cpp DateOps.cpp DateOpsIntl.cpp PlanetData.cpp Lunar.cpp Pluto.cpp MathOps.cpp RiseSet.cpp Vsop.cpp /Fe
+	mv mosh.exe riser.exe
+
+# =================================================
+
+build:: Astro.a ConfigFile.o
+	$(CXX) $(CPPFLAGS) -o riser.exe mosh.cpp Astro.a ConfigFile.o
+
+today:: build
+	./riser.exe -v -debug -today
+
+year:: build
+	./riser.exe -from $(YEAR)/01/01 -to $(YEAR2)/05/09 > $(TMPOUT) ;\
 	echo "File $(TMPOUT) is" ;\
 	head -8 $(TMPOUT) ; echo ... ; \
 	grep -A 1 -B 1 $$(date +%Y/%m/%d) $(TMPOUT) ; echo ... ; \
 	tail -2 $(TMPOUT) ;\
-	./sun-rise-set.exe -days 1
 
+years:: years2
 
-cal:: test
+test:: #build
+	./riser.exe -debug -cfg DarkCal.cfg \
+	  -from 2015/01/01 -to 2015/01/02 > test.tmp
+	diff -wb test.orig test.tmp
 
-exe: $(LIB) $(DC) test
+exe: $(ASTRO_LIB) $(EXE_NAME) years2
 
-$(LIBOBJS):
+$(LIBOBJS): $(LIB_SRC)
 
-$(LIB) : $(LIBOBJS)
-	ar -r $(LIB) $(LIBOBJS)
+$(ASTRO_LIB) : $(LIBOBJS)
+	ar -r $(ASTRO_LIB) $(LIBOBJS)
 
-$(DC): $(DC_BASE).o ConfigFile.o $(LIB)
-	$(CXX) -o $(DC) $(DC_BASE).o ConfigFile.o $(LIB)
+$(EXE_NAME): $(MAIN_PROG).o ConfigFile.o $(ASTRO_LIB)
+	$(CXX) -o $(EXE_NAME) $(MAIN_PROG).o ConfigFile.o $(ASTRO_LIB)
 
 AstroOps.o: AstroOps.h
 ConfigFile.o: ConfigFile.h
-$(DC_BASE).o: AstroOps.h PlanetData.h DateOps.h RiseSet.h ConfigFile.h
+$(MAIN_PROG).o: AstroOps.h PlanetData.h DateOps.h RiseSet.h ConfigFile.h
 DateOps.o: DateOps.h
 DateOpsIntl.o: DateOps.h
 PlanetData.o: PlanetData.h AstroOps.h MathOps.h Lunar.h Pluto.h Vsop.h
@@ -50,15 +67,15 @@ RiseSet.o: RiseSet.h AstroOps.h PlanetData.h Vsop.h
 Vsop.o: Vsop.h VsopData.cpp
 DarkCal.o: DarkCal.cpp DarkCal.h
 
-tags:: $(ALL_SRCS)
+tags::
 	ctags -R .
 
 clean:
-	rm -fv $(LIB) $(DC) $(wildcard *.o) *.a # tags g++
-	rm -rfv *.obj *.exe *.stackdump
+	rm -fv $(ASTRO_LIB) $(EXE_NAME) $(wildcard *.o) *.a # tags g++
+	rm -rfv *.obj *.exe *.stackdump *.tmp
 	rm -rfv vs9/Debug/
 
-test:: $(DC) tags $(wildcard *.cfg)
+years2:: $(EXE_NAME)
 	# ./DarkCal $$(date +"%m") $$(date +"%Y")
 	@output=mlr-$(YEAR)-2020.txt ;\
 	echo "Writing $$output" ;\

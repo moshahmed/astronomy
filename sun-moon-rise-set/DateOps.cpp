@@ -220,7 +220,7 @@ void DateOps::dayToDmy( long jd, int& day, int& month, long& year, int calendar 
   #endif
   default:       /* undefined calendar */
     return;
-    break;
+    // break; // unreachable
   }  // end switch()
 
   YearEndDays yed;

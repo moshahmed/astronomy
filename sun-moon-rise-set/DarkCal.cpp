@@ -304,7 +304,8 @@ void calcAndPrint(CalData& cd)
   if (g_verbose)
     fprintf( stderr, "working" );
 
-  for( int i=0; i<=end+1; i++ )
+  int i;
+  for( i=0; i<=end+1; i++ )
   {
     long day = jd_start + i;
 
@@ -338,7 +339,7 @@ void calcAndPrint(CalData& cd)
   // print data for each day
   //
   char buf[256];
-  for( int i=0; i<end; i++ ) {
+  for( i=0; i<end; i++ ) {
 
     if (g_html) {
       if ( !(i&1) )
@@ -399,8 +400,7 @@ void calcAndPrint(CalData& cd)
 //----------------------------------------------------------------------------
 // print usage and exit
 //
-void usage(const char* pn, bool x = true)
-{
+void usage(const char* pn) {
   fprintf( stderr,
       "Usage: %s <month> <year> [-d] [-h] [-t] [-u]\n"
       "       month is 1..12, year is 4 digit\n"
@@ -422,7 +422,7 @@ void usage(const char* pn, bool x = true)
 //----------------------------------------------------------------------------
 #include <time.h>
 
-int main( int argc, char* *argv ) {
+int main( int argc, char* *argv ) { /* #IF DarkCal.exe */
   // check / get arguments
   if ( argc < 3 )
     usage(argv[0]);

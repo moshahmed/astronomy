@@ -70,7 +70,7 @@ char* time_str5(double t, char* p) {
   return p;
 }
 
-void title_year(CalData &cd, ConfigFile &cf, double jd1){
+void title_year(CalData &cd, ConfigFile &cf){
   printf("\n");
   printf("Year %04d Calendar for %s\n"
          "lat=%g %c, lon=%g %c, TZ=%g\n",
@@ -78,7 +78,7 @@ void title_year(CalData &cd, ConfigFile &cf, double jd1){
     cf.value("city"),
     cd.loc.degLatitude(),   cd.loc.degLatitude()>0?  'N':'S',
     cd.loc.degLongitude(),  cd.loc.degLongitude()>0? 'W':'E',
-    cd.loc.timeZone() // , jd1
+    cd.loc.timeZone()
     );
 }
 
@@ -92,7 +92,7 @@ void title_month(int month, int year){
     "---", "----", "--", "--", "Rise-", "Set--", "Rise-", "Set--", "Phase"); 
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) {  /* IF riser.exe */
   CalData cd;
   ConfigFile cf;
   set_cd_today(cd);
@@ -191,7 +191,7 @@ int main(int argc, char** argv) {
     DateOps::dayToDmy( (long int) jd, &day, &month, &year);
 
     if ((month==1 && day==1) || jd == jd1 || (count++)==0)
-      title_year(cd, cf, jd1);
+      title_year(cd, cf);
     if (day==1 || (count++)==0)
       title_month(month, year);
     TimePair sunRS, moonRS;

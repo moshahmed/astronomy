@@ -213,7 +213,7 @@ bool ConfigFile::compactBuffer(char* buffer) {
 //
 int ConfigFile::readAndParseFile( const char* fname ) {
   if( debug >= 1) {
-    fprintf( stderr, "> readAndParseFile( %s )\n", fname );
+    fprintf( stderr, "# Using config file:%s\n", fname );
   }
 
   m_status = NO_ENTRIES;
@@ -319,7 +319,7 @@ int ConfigFile::readAndParseFile( const char* fname ) {
 //----------------------------------------------------------------------------
 // unit test bed
 //
-int main( int argc, char** argv ) {
+int main( int argc, char** argv ) { /* #IF UNIT_TEST */
 
   ConfigFile cf;
   //cf.debug = 2;

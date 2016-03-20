@@ -32,7 +32,8 @@ void Pluto::calcAllLocs( double& lat, double& lon, double& rad, const double t) 
   double rad_ = 407.247248;  // temporarily in tenths of AUs; fixed at the end
 
   double arg;
-  for( int i=0; i<7; i++ ) {
+  int i;
+  for( i=0; i<7; i++ ) {
     if( i == 6)
       arg = mlJup - mlPl;
     else
@@ -48,7 +49,7 @@ void Pluto::calcAllLocs( double& lat, double& lon, double& rad, const double t) 
   }
 
   PlutoCoeffs* pc = plutoCoeff;
-  for( int i=0; i<N_COEFFS; i++ ) {
+  for( i=0; i<N_COEFFS; i++ ) {
     if( pc->lon_a || pc->lon_b ||
         pc->lat_a || pc->lat_b ||
         pc->rad_a || pc->rad_b)

@@ -95,14 +95,15 @@ void RiseSet::getTimes( TimePair& riseSet, RSType rst, double jd, ObsInfo& oi )
 
   // Compute the altitude for each hour:
   //
-  for( int i=0; i<=Astro::IHOURS_PER_DAY; i++ ) {
+  int i;
+  for( i=0; i<=Astro::IHOURS_PER_DAY; i++ ) {
     pd.calc( planet, jd + Astro::toDays(i), oi );
     altitude[i] = asin( pd.altazLoc(2) ) - risesetAlt;
   }
 
   // Scan the hours, looking for rise/sets:
   //
-  for( int i=0; i<Astro::IHOURS_PER_DAY; i++ ) {
+  for( i=0; i<Astro::IHOURS_PER_DAY; i++ ) {
     double* pRS = 0;
     if( altitude[i] <= 0. && altitude[i+1] > 0.) {
       // object is rising
