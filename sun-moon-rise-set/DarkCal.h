@@ -9,8 +9,8 @@ enum DST { DST_NONE, DST_START, DST_END };
 
 // Struct to hold date & location
 struct CalData {
-  CalData() : month(1), year(2000) {}
-
+  CalData() : day(1), month(1), year(2000) {}
+  int day;
   int month;
   int year;
   ObsInfo loc;

@@ -70,11 +70,11 @@ char* time_str5(double t, char* p) {
   return p;
 }
 
-void title_year(CalData &cd, ConfigFile &cf){
+void title_year(CalData &cd, ConfigFile &cf, int year){
   printf("\n");
   printf("Year %04d Calendar for %s\n"
-         "lat=%g %c, lon=%g %c, TZ=%g\n",
-    cd.year,
+         "Lat=%g %c, Lon=%g %c, TZ=%g\n",
+    year, // cd.year,
     cf.value("city"),
     cd.loc.degLatitude(),   cd.loc.degLatitude()>0?  'N':'S',
     cd.loc.degLongitude(),  cd.loc.degLongitude()>0? 'W':'E',
@@ -86,10 +86,14 @@ void title_month(int month, int year){
   printf("\n");
   printf("%s %4d/%d Monthly Sun Moon Calendar\n",
     monthNames[month-1], (int) year, month);
-  printf("%3s %4s/%2s/%2s %5s %5s %5s %5s %5s\n",
-    "Day", "Year", "Mo", "dd", "Sun--", "Sun--", "Moon-", "Moon-", "Moon-");
-  printf("%3s %4s/%2s/%2s %5s %5s %5s %5s %5s\n",
-    "---", "----", "--", "--", "Rise-", "Set--", "Rise-", "Set--", "Phase"); 
+  printf("+%3s+%4s-%2s-%2s+%5s+%5s+%5s+%5s+%5s+\n",
+    "---", "----", "--", "--", "-----", "-----", "-----", "-----", "-----"); 
+  printf("|%3s|%4s %2s %2s|%5s|%5s|%5s|%5s|%5s|\n",
+    "Day", "Date", "  ", "  ", "Sun  ", "Sun  ", "Moon ", "Moon ", "Moon ");
+  printf("|%3s|%4s/%2s/%2s|%5s|%5s|%5s|%5s|%5s|\n",
+    "day", "yyyy", "mm", "dd", "Rise ", "Set  ", "Rise ", "Set  ", "Phase"); 
+  printf("+%3s+%4s-%2s-%2s+%5s+%5s+%5s+%5s+%5s+\n",
+    "---", "----", "--", "--", "-----", "-----", "-----", "-----", "-----"); 
 }
 
 int main(int argc, char** argv) {  /* IF riser.exe */
@@ -190,10 +194,11 @@ int main(int argc, char** argv) {  /* IF riser.exe */
     int month, day;
     DateOps::dayToDmy( (long int) jd, &day, &month, &year);
 
-    if ((month==1 && day==1) || jd == jd1 || (count++)==0)
-      title_year(cd, cf);
-    if (day==1 || (count++)==0)
+    if ((month==1 && day==1) || (count==0))
+      title_year(cd, cf, year);
+    if (day==1 || (count==0))
       title_month(month, year);
+    count++;
     TimePair sunRS, moonRS;
 
     static char srt[4][20];
@@ -204,7 +209,7 @@ int main(int argc, char** argv) {  /* IF riser.exe */
     RiseSet::getTimes( sunRS,  RiseSet::SUN,  jdtz, cd.loc );
     RiseSet::getTimes( moonRS, RiseSet::MOON, jdtz, cd.loc );
 
-    printf("%3s %04d/%02d/%02d %5s %5s %5s %5s %5d%%\n",
+    printf("|%3s|%04d/%02d/%02d|%5s|%5s|%5s|%5s|%3d%% |\n",
       weekDay[((int)jd) % 7],
       (int)year, month, day,
       time_str5(sunRS.TP_RISE,srt[0]) , time_str5(sunRS.TP_SET,srt[1]),

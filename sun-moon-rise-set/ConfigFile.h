@@ -71,8 +71,8 @@ private:
 
   static char* strDup( const char* p );
 
-  const char* m_name;
-  const char* m_value;
+  char* m_name;
+  char* m_value;
   CFList* m_next;
 };  // end class CFList
 
@@ -132,7 +132,7 @@ public:
 
   // update string value into.
   void update( const char* name, const char *value ) {
-    return m_items.update( name, value );
+    m_items.update( name, value );
   }
 
   // output all keys and values

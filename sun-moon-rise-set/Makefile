@@ -8,9 +8,10 @@ LIBOBJS = AstroOps.o DateOps.o DateOpsIntl.o PlanetData.o Lunar.o Pluto.o MathOp
 
 ASTRO_LIB = Astro.a
 MAIN_PROG = DarkCal
-EXE_NAME = $(MAIN_PROG).exe
+# EXE_NAME = $(MAIN_PROG).exe
 #DEBUG = -g
 # CPPFLAGS = $(DEBUG) -ffast-math -Wall
+EXE_NAME=riser.exe
 
 CPPFLAGS = $(DEBUG) -Wall
 TMPOUT=$(TMP)/m.txt
@@ -19,19 +20,18 @@ YEAR := $(shell date +%Y)
 YEAR2 := $(shell date -d "+2 year" +%Y)
 
 vc6::
-	cl.exe /W3 mosh.cpp ConfigFile.cpp AstroOps.cpp DateOps.cpp DateOpsIntl.cpp PlanetData.cpp Lunar.cpp Pluto.cpp MathOps.cpp RiseSet.cpp Vsop.cpp /Fe
-	mv mosh.exe riser.exe
+	cl.exe /W3 mosh.cpp ConfigFile.cpp AstroOps.cpp DateOps.cpp DateOpsIntl.cpp PlanetData.cpp Lunar.cpp Pluto.cpp MathOps.cpp RiseSet.cpp Vsop.cpp /link /out:$(EXE_NAME)
 
 # =================================================
 
 build:: Astro.a ConfigFile.o
-	$(CXX) $(CPPFLAGS) -o riser.exe mosh.cpp Astro.a ConfigFile.o
+	$(CXX) $(CPPFLAGS) -o $(EXE_NAME) mosh.cpp Astro.a ConfigFile.o
 
 today:: build
-	./riser.exe -v -debug -today
+	./$(EXE_NAME) -v -debug -today
 
 year:: build
-	./riser.exe -from $(YEAR)/01/01 -to $(YEAR2)/05/09 > $(TMPOUT) ;\
+	./$(EXE_NAME) -from $(YEAR)/01/01 -to $(YEAR2)/05/09 > $(TMPOUT) ;\
 	echo "File $(TMPOUT) is" ;\
 	head -8 $(TMPOUT) ; echo ... ; \
 	grep -A 1 -B 1 $$(date +%Y/%m/%d) $(TMPOUT) ; echo ... ; \
@@ -40,7 +40,7 @@ year:: build
 years:: years2
 
 test:: #build
-	./riser.exe -debug -cfg DarkCal.cfg \
+	./$(EXE_NAME) -debug -cfg DarkCal.cfg \
 	  -from 2015/01/01 -to 2015/01/02 > test.tmp
 	diff -wb test.orig test.tmp
 

@@ -252,11 +252,11 @@ int VisLimit::computeSkyBrightness(AngularBrightnessData& abd)
             brightness[i] = bn + twilightBrightness + brightnessMoon;
          else
             brightness[i] = bn + brightnessDaylight + brightnessMoon;
-#ifdef TEST_STATEMENTS
+        #ifdef TEST_STATEMENTS
          if( i == 0)
             printf( "Brightnesses: %lg %lg %lg %lg\n", bn,
                   brightnessMoon, twilightBrightness, brightnessDaylight);
-#endif
+        #endif
          }
    return( 0);
 }
@@ -264,9 +264,9 @@ int VisLimit::computeSkyBrightness(AngularBrightnessData& abd)
 #ifdef TEST_PROGRAM
 #include <stdio.h>
 
-int main( int argc, char **argv) {  /* #IF TEST_PROGRAM */
+int main(int argc, char **argv) {  /* #IF TEST_PROGRAM */
    if (argc < 2) {
-     fprintf( stderr, "usage: %s <zenith angle>\n", argv[0] );
+     fprintf(stderr, "Usage: %s <zenith angle>\n", argv[0] );
      return 1;
    }
    FixedBrightnessData f;
