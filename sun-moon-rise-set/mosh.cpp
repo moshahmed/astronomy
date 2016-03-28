@@ -82,18 +82,21 @@ void title_year(CalData &cd, ConfigFile &cf, int year){
     );
 }
 
+void separator(void) {
+  printf("+%3s+%4s-%2s-%2s+%5s+%5s+%5s+%5s+%5s+\n",
+    "---", "----", "--", "--", "-----", "-----", "-----", "-----", "-----"); 
+}
+
 void title_month(int month, int year){
   printf("\n");
   printf("%s %4d/%d Monthly Sun Moon Calendar\n",
     monthNames[month-1], (int) year, month);
-  printf("+%3s+%4s-%2s-%2s+%5s+%5s+%5s+%5s+%5s+\n",
-    "---", "----", "--", "--", "-----", "-----", "-----", "-----", "-----"); 
+  separator();
   printf("|%3s|%4s %2s %2s|%5s|%5s|%5s|%5s|%5s|\n",
     "Day", "Date", "  ", "  ", "Sun  ", "Sun  ", "Moon ", "Moon ", "Moon ");
   printf("|%3s|%4s/%2s/%2s|%5s|%5s|%5s|%5s|%5s|\n",
     "day", "yyyy", "mm", "dd", "Rise ", "Set  ", "Rise ", "Set  ", "Phase"); 
-  printf("+%3s+%4s-%2s-%2s+%5s+%5s+%5s+%5s+%5s+\n",
-    "---", "----", "--", "--", "-----", "-----", "-----", "-----", "-----"); 
+  separator();
 }
 
 int main(int argc, char** argv) {  /* IF riser.exe */
@@ -155,6 +158,7 @@ int main(int argc, char** argv) {  /* IF riser.exe */
     }
     if (!strcmp(argv[i],"-cfg") && (++i)<argc) {
       cf.filename(argv[i]);
+      set_cd(cd, cf);
       continue;
     }
     if ( !strcmp(argv[i],"-h") || !strcmp(argv[i],"-?")){
@@ -183,7 +187,6 @@ int main(int argc, char** argv) {  /* IF riser.exe */
     fprintf(stderr, "Cannot parse option argv[%d] %s\n", i, argv[i]);
     exit(1);
   }
-  set_cd(cd, cf);
 
   static const double hourFraction = 1./24.;
   double tzAdj = (double)cd.loc.timeZone() * hourFraction;
@@ -215,7 +218,8 @@ int main(int argc, char** argv) {  /* IF riser.exe */
       time_str5(sunRS.TP_RISE,srt[0]) , time_str5(sunRS.TP_SET,srt[1]),
       time_str5(moonRS.TP_RISE,srt[2]), time_str5(moonRS.TP_SET,srt[3]),
       (int)(Lunar::ageOfMoonInDays(jdtz)*100./29.53));
-
   }
+  if (count>0)
+    separator();
   return 0;
 }

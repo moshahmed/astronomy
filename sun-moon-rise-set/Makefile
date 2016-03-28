@@ -20,11 +20,13 @@ YEAR := $(shell date +%Y)
 YEAR2 := $(shell date -d "+2 year" +%Y)
 
 vc6::
+	@echo Building 32bit $(EXE_NAME) with msdev/vc6
 	cl.exe /W3 mosh.cpp ConfigFile.cpp AstroOps.cpp DateOps.cpp DateOpsIntl.cpp PlanetData.cpp Lunar.cpp Pluto.cpp MathOps.cpp RiseSet.cpp Vsop.cpp /link /out:$(EXE_NAME)
 
 # =================================================
 
 build:: Astro.a ConfigFile.o
+	@echo Building 64bit $(EXE_NAME) with gcc
 	$(CXX) $(CPPFLAGS) -o $(EXE_NAME) mosh.cpp Astro.a ConfigFile.o
 
 today:: build
@@ -41,8 +43,11 @@ years:: years2
 
 test:: #build
 	./$(EXE_NAME) -debug -cfg DarkCal.cfg \
-	  -from 2015/01/01 -to 2015/01/02 > test.tmp
-	diff -wb test.orig test.tmp
+	  -from 2015/01/01 -to 2015/01/02 > test1.tmp
+	./$(EXE_NAME) -debug \
+	  -lat 12.887261 -lon 74.831657 -tz +5.5  -city Mangalore,India \
+	  -from 2015/01/01 -to 2015/01/02 > test2.tmp
+	diff3 test*.tmp
 
 exe: $(ASTRO_LIB) $(EXE_NAME) years2
 
@@ -94,5 +99,4 @@ years2:: $(EXE_NAME)
 	head -8 $$output ;\
 	echo "..." ;\
 	tail -5 $$output ;\
-	
 
