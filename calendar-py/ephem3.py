@@ -1,8 +1,8 @@
 #!C:/Python25/python
 # What: Print calendar with full moon, sunrise, sunset for 1st of each month.
 # From http://www.mannyjuan.com/calend2.txt
-# Ephem integration GPL(C) moshahmed/at/gmail
-# $Header: c:/cvs/repo/github/astronomy/calendar-py/ephem3.py,v 1.1 2014-02-19 07:49:37 a Exp $ 
+# Ephem integration GPL(C) mosh moshahmed/at/gmail
+# $Header: c:/cvs/repo/mosh/python/calendar/ephem3.py,v 1.32 2017-01-27 08:38:57 a Exp $
 
 USAGE = """USAGE:
   ephem3.py [-h] [-c style] [-l location] [-s start_date] [-e end_date] [-f file]
@@ -32,9 +32,10 @@ USAGE = """USAGE:
     For each year, month in the date range.
   Timezone: To see list of timezones matching a word, set timezone to /word, e.g.
   e.g. Location = 'Mumbai;19;73;0;/Asia'
-  """ 
+  """
 
 import types, time, datetime, ephem, sys, re, getopt, pytz, string
+import cities
 
 # Exception raised for bad input (with string parameter for details)
 error = 'calendar.error'
@@ -141,7 +142,7 @@ def _month_calendar(city, year, month, begweek):
           if len(constel) > 10:
             constel = constel[:10]
           pi_constel[i] = constel
-            
+
           rise = city.next_rising(planet, start=date).datetime()
           sett = city.next_setting(planet, start=date).datetime()
 
@@ -223,7 +224,7 @@ def week_header(width, begweek, border=' '):
       str = str + border
     str = str + _center(names[(i+begweek+6)%7][:width], width)
   if border and border != ' ':
-    str = border + str + border 
+    str = border + str + border
   return str
 
 def print_month(city, year, month, begweek=0, width = 0, extra_height=2):
@@ -245,8 +246,8 @@ def print_month(city, year, month, begweek=0, width = 0, extra_height=2):
       for i in range(planet_info_lines):
         pi_info, rows = rows[0], rows[1:]
         print_week(pi_info, width, '|', 'right'); print >> fout
-      
-    for i in range(extra_height): 
+
+    for i in range(extra_height):
       print_week(['']*7, width, '|'); print >> fout
   print_week([('-'*(width))]*7, width, '+'); print >> fout
 
@@ -274,9 +275,9 @@ def monthly_ephem(city, year, month):
   # moon_phase is not used, only next_full_moon date is printed.
   return "M:%2d Sun:%02d:%02d-%02d:%02d" % (
     next_full_moon.day,
-    sunrise.hour, sunrise.minute, 
+    sunrise.hour, sunrise.minute,
     sunset.hour, sunset.minute)
- 
+
 def print_year_calendar(city, year, begweek=0):
   # +----------+----------+----------+----------+----------+----------+----------+
   # |  Sunday  |  Monday  |  Tuesday | Wednesday| Thursday |  Friday  | Saturday |
@@ -308,7 +309,7 @@ def print_year_calendar(city, year, begweek=0):
       data.append(cal)
 
     # print data
-    # e.g. data for 2011 = 
+    # e.g. data for 2011 =
     #    [[[0, 0, 0, 0, 0, 0, 1], [2, 3, 4, 5, 6, 7, 8],
     #      [9, 10, 11, 12, 13, 14, 15], [16, 17, 18, 19, 20, 21, 22],
     #      [23, 24, 25, 26, 27, 28, 29], [30, 31, 0, 0, 0, 0, 0]],
@@ -317,7 +318,7 @@ def print_year_calendar(city, year, begweek=0):
     #      [27, 28, 0, 0, 0, 0, 0]],
     #     [[0, 0, 1, 2, 3, 4, 5],
     #      [6, 7, 8, 9, 10, 11, 12], [13, 14, 15, 16, 17, 18, 19],
-    #      [20, 21, 22, 23, 24, 25, 26], [27, 28, 29, 30, 31, 0, 0]]] 
+    #      [20, 21, 22, 23, 24, 25, 26], [27, 28, 29, 30, 31, 0, 0]]]
 
     # print each line 0..height-1
     for i in range(height):
@@ -354,7 +355,7 @@ def read_events(event_filename):
   #   # comment
   #   date ; description
   # date format: YYYY/MM/DD or MM/DD
-  fin = open(event_filename) 
+  fin = open(event_filename)
   for line in fin:
     if re.match('^#',line):
       continue
@@ -372,7 +373,7 @@ def read_events(event_filename):
       sys.exit(1)
     # print '"%s" -- "%s"' % (date, events[date])
   fin.close()
- 
+
 # ephem2.py
 def cmp_ymd(d1, d2):
   " Compare two ephem dates for approx equality."
@@ -400,7 +401,7 @@ def moon_is_full(date):
   if m == 'FM': return 'Moon Full'
   if m == 'LQ': return 'Moon LQ'
   return ''
- 
+
 def full_moon_from_to(start_date, end_date):
   "Print the full moons"
   # Not used,
@@ -416,8 +417,8 @@ def full_moon_from_to(start_date, end_date):
 
 def ephem_one_day(city, date):
   city.date = date
-  moon = ephem.Moon()  
-  sun = ephem.Sun()   
+  moon = ephem.Moon()
+  sun = ephem.Sun()
   moon.compute(date, epoch='2000')
 
   sunrise = city.next_rising(sun).datetime()
@@ -426,7 +427,7 @@ def ephem_one_day(city, date):
   # convert rise/set to localtime
   sunrise = pytz.utc.localize(sunrise).astimezone(city.pytz)
   sunset = pytz.utc.localize(sunset).astimezone(city.pytz)
- 
+
   moon_phase = int(moon.moon_phase*30),
   moon_fm = moon_is(date)
 
@@ -465,14 +466,14 @@ def calendar_from_to(city, start_date, end_date, braces):
       moonx = moon_fm
     else:
       moonx = "%2d" % moon_phase
-    
+
 
     print '%04d-%02d-%02d %3s M:%2s SR:%02d:%02d SS:%02d:%02d' % (
       date.year, date.month, date.day, weekday,
       moonx,
-      sunrise.hour, sunrise.minute, 
+      sunrise.hour, sunrise.minute,
       sunset.hour, sunset.minute
-      ) 
+      )
 
     date += next_day
   if braces:
@@ -490,27 +491,15 @@ def get_timezone(tzname):
     else:
       print 'See pytz.all_timezones, supply /regexp, eg. /US'
     sys.exit(1)
- 
+
 class city_info(ephem.Observer): # Observer + { name, pytz }
   pass
 
-locations = {
-  # Notes:
-  #   1. Spaces are first trimmed.
-  #   2. TZ is Asia/Kolkoata or Asia/Calcutta, depending on python version.
-  #   3. vim: !align.pl '-/[,:\;]'
-  #"Location" : 'City      , Country ; Latitude  ; Longitude   ; Elevation ; Time   / Zone  '   ,
-  "Accra"     : 'Accra     , Ghana   ; 5.5701389 ; -0.17819444 ; 20        ; Africa / Accra'    ,
-  "Sunnyvale" : 'Sunnyvale , USA     ; 37.3689   ; -122.0353   ; 10        ; US     / Pacific'  ,
-  "Mumbai"    : 'Mumbai    , India   ; 18.977707 ; 72.822960   ; 21        ; Asia   / Calcutta' ,
-  "Mangalore" : 'Mangalore , India   ; 12.887261 ; 75.412277   ; 20        ; Asia   / Calcutta' ,
-  "Kigali"    : 'Kigali    , Rwanda  ; -1.94629  ; +30.10313   ; 1426      ; Africa / Kigali'   ,
-}
 
 def get_city(city):
   "Return city_info object"
-  if  locations.has_key(city):
-    city = locations[city]
+  if  cities.locations.has_key(city):
+    city = cities.locations[city]
 
   city = re.sub( r'\s+','', city) # trim all spaces
   m = city.split(';', 5)
@@ -528,7 +517,7 @@ def get_city(city):
     Examples: 'Accra;5;0;0;Africa/Accra' or 'SF;37;-122;30;US/Pacific'
     """
   exit(1)
- 
+
 
 if __name__ == '__main__':
   opt_help = 0
@@ -593,13 +582,13 @@ if __name__ == '__main__':
     opt_file = re.sub(r'[^\w_.//\\:]+', '-', opt_file)
     warn('Writing to %s' % opt_file)
     fout = open(opt_file, "w")
- 
+
 
   # Print linear calendar
   if opt_style == 'lines' or opt_style == 'all':
     end_date = start_date + datetime.timedelta(days_delta)
     calendar_from_to(city, start_date, end_date, days_delta > 1)
- 
+
   # Print yearly calendar
   if opt_style == 'yearly' or opt_style == 'all':
     print >> fout, 'Planetary Calendar for %s from %s' % (city.name, date_out)
