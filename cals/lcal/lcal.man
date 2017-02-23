@@ -1,0 +1,179 @@
+LCAL(1)                          USER COMMANDS                         LCAL(1)
+
+NAME
+       lcal - generate PostScript lunar phase calendars
+
+SYNOPSIS
+       lcal [-d [day_font]] [-t [title_font]] [-o file] [-l | -p]
+            [-s [[bg_color]][/fg_color]] [-i] [-z time_zone] [-S] [-O]
+            [-X [x1[/x2]]] [-Y [y1[/y2]]] [-W] [-h | -u | -v] [year]
+
+DESCRIPTION
+       Lcal generates PostScript to produce lunar phase calendars for any
+       year, in either landscape or portrait orientations.  Output can be in
+       any of 3 formats: 2-page (default), compressed 1-page, or odd-days-only
+       (uncompressed, 1-page).
+
+       The year argument, if provided, may be specified as either 1 or 2 dig-
+       its or as the full 4 digit year; if omitted, the calendar for the cur-
+       rent year will be generated.
+
+OPTIONS
+       If the environment variable LCAL_OPTS is defined, its contents are
+       parsed as a command line.  Flags set via LCAL_OPTS override the program
+       defaults, but are overridden by options set explicitly on the command
+       line.
+
+       Any flag which normally takes an argument may also be specified without
+       an argument; this resets the corresponding option to its default.  In
+       some cases, like when a parameter follows a flag without its optional
+       argument, this may lead to ambiguity; the dummy flag '-' (or '--') may
+       be used to separate them, e.g. "lcal -t - 2006".
+
+       -d [font]
+              Specifies the name of the font used to print the (abbreviated)
+              day-of-week names.
+
+              The default font is `Times-Bold'.
+
+              This option may also be set semi-permanently by altering the
+              makefile (`Makefile' for most environments, 'Makefile.DOS' for
+              MS-DOS).
+
+       -t [font]
+              Specifies the name of the font used to print the year, month/day
+              names, and dates.
+
+              The default font is `Times-Bold'.
+
+              This option may also be set semi-permanently by altering the
+              makefile (`Makefile' for most environments, 'Makefile.DOS' for
+              MS-DOS).
+
+       -o file
+              Directs lcal to write the output to file instead of to stdout.
+
+       -l     Causes the output to be in landscape orientation (default).
+
+       -p     Causes the output to be in portrait orientation.
+
+       -s [bg_color][/fg_color]
+              Overrides the default values for the background/foreground col-
+              ors.
+
+              For monochrome output/printers, these values must be in the
+              range 0.0 (black) through 1.0 (white); they may be set indepen-
+              dently of each other.  The default values are 1.0/0.0 (white
+              background, black moons, black text).
+
+              For color output/printers, bg_color and fg_color may optionally
+              be specified as a set of red:green:blue values; red, green, and
+              blue must in the range 0.0 through 1.0.  At least one colon
+              (':') must be present for this option to be recognized; omitted
+              values are set to 0.0.  (Try this for light gray moons and text
+              against a midnight blue background: -s0:0:0.7/0.9)
+
+              If the background color is darker than the foreground color,
+              lcal inverts the moon phase to ensure that full moons are
+              printed in the lighter color.  It determines this by comparing
+              the grayscale value (or average of the r:g:b values) of the
+              background and foreground colors; however, this isn't foolproof.
+              For example, lcal can't determine that yellow (1:1:0) appears
+              lighter on the physical page than cyan (0:1:1).
+
+       -i     Inverts the output colors, printing white moons on a black back-
+              ground (equivalent to -s 0.0/1.0).
+
+       -z time_zone
+              Specifies the local time zone, expressed as hours west of UTC.
+
+              For example, New York residents (USA Eastern time zone) would
+              use '-z 5' while on Eastern Standard Time (winter) and '-z 4'
+              while on Eastern Daylight Time (summer).  People in India would
+              use '-z-5.5'.  Notice that fractional values are allowed.
+
+              This option may also be set semi-permanently by altering the
+              makefile (`Makefile' for most environments, 'Makefile.DOS' for
+              MS-DOS).
+
+       -S     Compresses the output to fit a full year on a single page. Com-
+              pare the '-O' option.
+
+       -O     Display only the odd days of the month, allowing a full year to
+              fit on a single page without compression. Compare the '-S'
+              option.
+
+       -X [x1[/x2]]
+              Specifies the X-axis translation values (page 1 / page 2) for
+              positioning the output on the page.  Should only be needed for
+              calendars in landscape orientation.
+
+              This option may also be set semi-permanently by altering the
+              makefile (`Makefile' for most environments, 'Makefile.DOS' for
+              MS-DOS).
+
+       -Y [y1[/y2]]
+              Similar to the -X option, but specifies the Y-axis translation
+              values for positioning the output on the page.  Should only be
+              needed for calendars in portrait orientation.
+
+              By default, lcal will attempt to print 2-page calendars such
+              that the last moons on the first page are immediately adjacent
+              to the first moons on the second page.  However, many printers
+              can't actually print to the edges of the physical page.
+
+              The -X and -Y options allow the user to compensate for these
+              printer-to-printer variations in the positioning of output.  You
+              may find that the use of -X-20/20 (for landscape-oriented calen-
+              dars) or -Y20/-20 (for portrait-oriented calendars) improves the
+              situation.
+
+              This option may also be set semi-permanently by altering the
+              makefile (`Makefile' for most environments, 'Makefile.DOS' for
+              MS-DOS).
+
+       -W     Causes lcal to print the (abbreviated) day-of-week names in the
+              center of the moon icons (instead of to the lower left, which is
+              the default).
+
+              Use of this option results in more-complex PostScript output,
+              which is slower when previewing or printing.
+
+       -h     Displays version information, a brief parameter usage message,
+              and a full explanation of all options.
+
+       -u     Displays version information and a brief parameter usage mes-
+              sage.
+
+       -v     Displays version information only.
+
+SEE ALSO
+       Website for lcal and pcal (a conventional calendar generation applica-
+       tion, similar to lcal ):
+
+          http://pcal.sourceforge.net
+
+ACKNOWLEDGMENT
+       Lcal was inspired by "Moonlight 1996", a 16" x 36" full-color (silver
+       moons against a midnight blue background) lunar phase calendar marketed
+       by Celestial Products, Inc., P.O. Box 801, Middleburg VA 22117.  Send
+       for their catalog to see (and, hopefully, order) this as well as some
+       even more amazing stuff - particularly "21st Century Luna", a 22" x 72"
+       lunar phase calendar for every day of the upcoming century.  Or visit
+       their site:
+
+          http://www.celestialproducts.com
+
+AUTHORS
+       Lcal was written by Andrew Rogers.  It is largely based on pcal , orig-
+       inally written by Patrick Wood (Copyright (c) 1987 by Patrick Wood of
+       Pipeline Associates, Inc.), and authorized for modification and redis-
+       tribution.  The original C version of pcal was created by Ken Keirnan;
+       the moon phase routines were written by Jef Poskanzer and Craig Leres
+       (copyright 1988, with permission to use, copy, modify, and distribute)
+       and modified further by Mark Hanson (PostScript) and Richard Dyson (C).
+       Later changes to lcal (the addition of the odd-days-only [1-page uncom-
+       pressed] format, various cleanups, design improvements, and bug fixes)
+       were made by Bill Marr.
+
+Version 2.0.0                     05 Aug 2006                          LCAL(1)
