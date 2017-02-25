@@ -1,0 +1,151 @@
+diff -rwb ./io.c ../ephem.orig/io.c
+32c32
+< /* #define UNIX */
+---
+> #define UNIX
+773,904d772
+< #if defined(WIN32) && defined(_CONSOLE)
+< #include <windows.h>
+<   static HANDLE hStdout, hStdin;
+< 
+<   void initscr() {
+<     hStdout = GetStdHandle ( STD_OUTPUT_HANDLE );
+<     hStdin = GetStdHandle(STD_INPUT_HANDLE);
+<     if ( INVALID_HANDLE_VALUE == hStdout ||
+<          INVALID_HANDLE_VALUE == hStdin) {
+<       printf("INVALID_HANDLE_VALUE\n");
+<       exit(1);
+<     }
+<     SetConsoleTitle("Ephem MSVC");
+<   }
+< 
+<   void clrtoeol() {
+<       int i=80;
+<       CONSOLE_SCREEN_BUFFER_INFO csbi; /* to get buffer info */ 
+<       GetConsoleScreenBufferInfo( hStdout, &csbi );
+<       for(i=csbi.dwCursorPosition.X; i<csbi.srWindow.Right;i++) { 
+<         printf(" "); 
+<       }
+<   }
+< 
+<   /* From microsoft support. */
+<   /* Standard error macro for reporting API errors */ 
+<   #define PERR(ok, api){if(!(ok)) \
+<      printf("%s:Error %d from %s on line %d\n", \
+<         __FILE__, GetLastError(), api, __LINE__);}
+< 
+<   void clear() {
+<     COORD home = { 0, 0 };  /* here's where we'll home the cursor */ 
+<     BOOL ok;
+<     DWORD cCharsWritten;
+<     CONSOLE_SCREEN_BUFFER_INFO csbi; /* to get buffer info */ 
+<     DWORD dwConSize; /* number of character cells in the current buffer */ 
+< 
+<     /* Get the number of character cells in the current buffer */ 
+<     ok = GetConsoleScreenBufferInfo( hStdout, &csbi );
+<     PERR( ok, "GetConsoleScreenBufferInfo" );
+<     dwConSize = csbi.dwSize.X * csbi.dwSize.Y;
+< 
+<     /* Fill the entire screen with blanks */ 
+<     ok = FillConsoleOutputCharacter( hStdout, (TCHAR) ' ',
+<        dwConSize, home, &cCharsWritten );
+<     PERR( ok, "FillConsoleOutputCharacter" );
+< 
+<     /* Get the current text attribute */ 
+<     ok = GetConsoleScreenBufferInfo( hStdout, &csbi );
+<     PERR( ok, "ConsoleScreenBufferInfo" );
+< 
+<     /* Now set the buffer's attributes accordingly */ 
+<     ok = FillConsoleOutputAttribute( hStdout, csbi.wAttributes,
+<        dwConSize, home, &cCharsWritten );
+<     PERR( ok, "FillConsoleOutputAttribute" );
+< 
+<     /* Put the cursor at (0, 0) */ 
+<     ok = SetConsoleCursorPosition( hStdout, home );
+<     PERR( ok, "SetConsoleCursorPosition" );
+<     return;
+<   }
+< 
+<   void endwin(void) {
+<     clear();
+<   }
+<  
+<   void gotoxy(int x, int y) {
+<      COORD pos; 
+<      pos.X = (short) y; /* swap x y. */
+<      pos.Y = (short) x;
+<      SetConsoleCursorPosition ( hStdout, pos );
+<   } 
+< 
+< c_pos (r, c)
+< int r, c;
+< {
+<   gotoxy(r,c-1);
+< }
+< 
+< /* erase entire screen. (ANSI: ESC [ 2 J) */
+< c_erase()
+< {
+<   clear();
+< }
+< 
+< /* erase to end of line. (ANSI: ESC [ K) */
+< c_eol()
+< {
+<   clrtoeol();
+< }
+< 
+< /* return 0 if there is a char that may be read without blocking, else -1 */
+< chk_char()
+< {
+< 	return (kbhit() == 0 ? -1 : 0);
+< }
+<  
+< /* read the next char, blocking if necessary, and return it. don't echo.
+<  * map the arrow keys if we can too into hjkl
+<  */
+< read_char()
+< {
+< 	int c;
+< 	fflush (stdout);
+< 	c = getch();
+< 	if (c==224) {
+< 	    /* get scan code; convert to direction hjkl if possible */
+< 	    c = getch();
+< 	    switch (c) {
+< 	    case 72: c = 'k'; break;
+< 	    case 75: c = 'h'; break;
+< 	    case 77: c = 'l'; break;
+< 	    case 80: c = 'j'; break;
+< 	    }
+< 	}
+< 	return (c);
+< }
+< 
+< /* do whatever might be necessary to get the screen and/or tty back into shape.
+<  */
+< byetty()
+< {
+<   endwin();
+< }
+< 
+< 
+< sleep(int seconds) {
+<     (void) _sleep (1000 * seconds);
+< }
+<  
+< #endif
+< 
+diff -rwb ./main.c ../ephem.orig/main.c
+80,83d79
+<   #if defined(WIN32) && defined(_CONSOLE)
+<   initscr();
+<   #endif
+< 
+diff -rwb ./time.c ../ephem.orig/time.c
+16,18d15
+< #if defined(WIN32) && defined(_CONSOLE)
+< #define	TZA
+< #else
+20d16
+< #endif
