@@ -1,46 +1,49 @@
+PYTHON=c:/python36/python.exe
 
-PYTHON=c:/python27/python.exe
 YEAR := $(shell date +%Y)
 NEXT_YEAR := $(shell date -d "+1 year" +%Y)
 DECADE := $(shell date -d "+10 year" +%Y)
 
-# CITY=Mumbai,Sunnyvale,Accra,Kigali,Mangalore
-CITY=NYC
+TMP=c:/tmp
+OUTDIR=out
+
+# CITY=Mumbai,Sunnyvale,Accra,Kigali,Mangalore,NYC,SanMateo
+CITY=Sunnyvale
 HOLIDAY=nul
 
-help:: ; grep -Pi "^[\w-]+:" Makefile
+help:: ; make -qps | grep -Pi "^\w+:"
 
-clean::
-	rm -fv *.pyc *.pdf planetary*.txt c:/tmp/planet*.txt
+all:
+	make cal-pdf
+	make ephem-city
 
-test::
-	c:/python27/python.exe ephem3.py -c lines -l NYC
+
 
 cal-pdf:
-	# Writes data/calendar-2014-CITY-{jan-jun,jul-dec}.pdf
+	# Writes $(OUTDIR)/calendar-2014-CITY-{jan-jun,jul-dec}.pdf
 	$(PYTHON) cal-pdf.py $(CITY) $(YEAR)
-	ls -ltrn data/
+	ls -ltrn $(OUTDIR)/
 
-city::
-	# Planetary text calendar for city
-	make clean
+ephem-city:: # Planetary text calendar for city
 	$(PYTHON) ephem3.py -c monthly -l $(CITY) \
-		-f data/planetary-cal-$(CITY)-$(YEAR).txt \
+		-f $(OUTDIR)/planetary-cal-$(CITY)-$(YEAR).txt \
 		-s $(YEAR)/01 \
 		-e $(YEAR)/12 \
+		-E $(HOLIDAY) \
 		-S ''
 
-decade::
+ephem-decade::
 	$(PYTHON) ephem3.py -c monthly -l $(CITY) \
-		-f data/planetary-calendar-$(CITY)-$(YEAR)-to-$(DECADE).txt \
+		-f $(OUTDIR)/planetary-calendar-$(CITY)-$(YEAR)-to-$(DECADE).txt \
 		-s $(YEAR)/01 \
 		-e $(DECADE)/12
 
-yearly::
+ephem-yearly::
 	$(PYTHON) ephem3.py -c yearly -l $(CITY) \
-		-f c:/tmp/ \
+		-f $(TMP)/ \
 		-s $(YEAR)/01 \
 		-e $(NEXT_YEAR)/12
 
+
 tags::
-	ctags *.py
+	ctags *.py *.pl

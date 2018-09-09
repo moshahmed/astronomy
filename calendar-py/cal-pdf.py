@@ -23,18 +23,18 @@ def get_months(year, startmon):
   reqd = 0
   for mon in range(6):
     weeks = calendar.monthcalendar(year, mon + startmon)
-    weeks[-1] = filter(None, weeks[-1])
+    weeks[-1] = [_f for _f in weeks[-1] if _f]
     mdays = []
     for week in weeks:
         mdays.extend(week)
     reqd = max(reqd, len(mdays))
     mons.append(mdays)
   return reqd, mons
- 
+
 def half_year(city, year, startmon):
     '''"startmon" gives the 1-indexed month to start the page on'''
     reqd, mons = get_months(year, startmon)
-    
+
     LEFTMARGIN  = 5
     DAYCOLWIDTH = 50
     CELLWIDTH   = 80
@@ -92,17 +92,17 @@ def half_year(city, year, startmon):
 if __name__ == '__main__':
     if len(sys.argv)>2:
       city_name = sys.argv[1]
-      year = string.atoi(sys.argv[2])
+      year = int(sys.argv[2])
     else:
       # today = datetime.datetime.date(datetime.datetime.now())
       # year = today.year
       # city_name = 'Accra'
-      print "Usage: ", sys.argv[0], " city_name year"
+      print("Usage: ", sys.argv[0], " city_name year")
       sys.exit(1)
 
     city = ephem3.get_city(city_name)
-
-    filename = 'data/calendar-%s-%d' % (city_name, year)
-    print ("Writing %s.*.pdf" % (filename))
-    renderPDF.drawToFile(half_year(city, year, 1), filename + '-jan-jun.pdf')
-    renderPDF.drawToFile(half_year(city, year, 7), filename + '-jul-dec.pdf')
+    outdir='out'
+    outfile = '%s/calendar-%s-%d' % (outdir,city_name, year)
+    print(("Writing %s.*.pdf" % (outfile)))
+    renderPDF.drawToFile(half_year(city, year, 1), outfile + '-jan-jun.pdf')
+    renderPDF.drawToFile(half_year(city, year, 7), outfile + '-jul-dec.pdf')

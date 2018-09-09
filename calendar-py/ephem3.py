@@ -2,7 +2,7 @@
 # What: Print calendar with full moon, sunrise, sunset for 1st of each month.
 # From http://www.mannyjuan.com/calend2.txt
 # Ephem integration GPL(C) mosh moshahmed/at/gmail
-# $Header: c:/cvs/repo/mosh/python/calendar/ephem3.py,v 1.32 2017-01-27 08:38:57 a Exp $
+# $Header: c:/cvs/repo/mosh/calendar/ephem3.py,v 1.2 2018/09/09 01:59:50 User Exp $
 
 USAGE = """USAGE:
   ephem3.py [-h] [-c style] [-l location] [-s start_date] [-e end_date] [-f file]
@@ -50,6 +50,9 @@ def print_fout_nospace(str):
 def warn(str):
   sys.stderr.write('%s\n' % str)
 
+def warn_cr(str):
+  sys.stderr.write('%s\r' % str)
+
 January = 1
 February = 2
 day_in_month = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -75,7 +78,7 @@ month_abbr = [ '   ',
 
 def isleap(year):
   # Return 1 for leap years, 0 for non-leap years
-  return year % 4 == 0 and (year % 100 <> 0 or year % 400 == 0)
+  return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
 
 def leap_days(y1, y2):
   # Return number of leap years in range [y1, y2)
@@ -92,7 +95,7 @@ def month_range(year, month, begweek):
   # Return the weekday (0-6 ~ Mon-Sun) of (year, month, 1)
   # and number of days (28-31) in the month of (year, month)
   if not 1 <= month <= 12:
-    raise ValueError, 'bad month number'
+    raise ValueError('bad month number')
   day1 = (weekday(year, month, 1) + 1 - begweek) % 7
   ndays = day_in_month[month] + (month == February and isleap(year))
   return day1, ndays
@@ -107,7 +110,7 @@ def _month_calendar(city, year, month, begweek):
   # if city is provided, add extra rows for planet info.
   day1, ndays = month_range(year, month, begweek)
   rows = []
-  r7 = range(7)
+  r7 = list(range(7))
   day = 1 - day1
   while day <= ndays:
     row = ['']*7
@@ -120,7 +123,7 @@ def _month_calendar(city, year, month, begweek):
     pi_event = ['']*7
     for i in r7:
       if 1 <= day <= ndays:
-        row[i] = `day`
+        row[i] = repr(day)
 
         # Annotate (city, year, month, day) here.
         if city:
@@ -160,10 +163,10 @@ def _month_calendar(city, year, month, begweek):
           # TODO look for solstice equinox
 
           evdate = "%04d/%02d/%02d" % (year, month, day)
-          if events.has_key(evdate):
+          if evdate in events:
             pi_event[i] += events[evdate]
           evdate = "%02d/%02d" % (month, day)
-          if events.has_key(evdate):
+          if evdate in events:
             pi_event[i] += events[evdate]
 
       day = day + 1
@@ -185,7 +188,7 @@ _mc_cache = {}
 def month_calendar(city, year, month, begweek):
   # Caching interface to _month_calendar
   key = (city, year, month, begweek)
-  if _mc_cache.has_key(key):
+  if key in _mc_cache:
     return _mc_cache[key]
   else:
     _mc_cache[key] = ret = _month_calendar(city, year, month, begweek)
@@ -200,7 +203,7 @@ def _center(str, width, padon='both'):
   if pad <= 0:
     return str
   if padon == 'both': # center
-    return ' '*((pad+1)/2) + str + ' '*((pad)/2)
+    return ' '*int((pad+1)/2) + str + ' '*int((pad)/2)
   elif padon == 'left':
     return ' '*pad + str
   else:
@@ -229,27 +232,26 @@ def week_header(width, begweek, border=' '):
 
 def print_month(city, year, month, begweek=0, width = 0, extra_height=2):
   width = max(2, width)
-  title = month_name[month] + ' ' + `year` + ' - ' + city.name
+  title = month_name[month] + ' ' + repr(year) + ' - ' + city.name
   if subtitle:
     title = title + ', ' + subtitle
-  print >> fout, _center(title, 7*(width+1) - 1),
-  print >> fout
-  print_week([('-'*(width))]*7, width, '+'); print >> fout
-  print >> fout, week_header(width, begweek, '|'), ; print >> fout
+  print(_center(title, 7*(width+1) - 1), file=fout)
+  print_week([('-'*(width))]*7, width, '+'); print(file=fout)
+  print(week_header(width, begweek, '|'), file=fout)
   rows = month_calendar(city, year, month, begweek)
   while len(rows)>0:
     week, rows = rows[0], rows[1:]
 
-    print_week([('-'*(width))]*7, width, '+'); print >> fout
-    print_week(week, width, '|', 'right'); print >> fout
+    print_week([('-'*(width))]*7, width, '+'); print(file=fout)
+    print_week(week, width, '|', 'right'); print(file=fout)
     if city:
       for i in range(planet_info_lines):
         pi_info, rows = rows[0], rows[1:]
-        print_week(pi_info, width, '|', 'right'); print >> fout
+        print_week(pi_info, width, '|', 'right'); print(file=fout)
 
     for i in range(extra_height):
-      print_week(['']*7, width, '|'); print >> fout
-  print_week([('-'*(width))]*7, width, '+'); print >> fout
+      print_week(['']*7, width, '|'); print(file=fout)
+  print_week([('-'*(width))]*7, width, '+'); print(file=fout)
 
 # Spacing of month columns
 _day_width = 2
@@ -259,10 +261,10 @@ _right_end = '|'
 
 def format_3_column(a, b, c):
   # 3-column formatting for year calendars
-  print >> fout, _col_pad + _center(a, _col_width),
-  print >> fout, _col_pad + _center(b, _col_width),
-  print >> fout, _col_pad + _center(c, _col_width),
-  print >> fout, _right_end
+  print(_col_pad + _center(a, _col_width), end=' ', file=fout)
+  print(_col_pad + _center(b, _col_width), end=' ', file=fout)
+  print(_col_pad + _center(c, _col_width), end=' ', file=fout)
+  print(_right_end, file=fout)
 
 def monthly_ephem(city, year, month):
   # Return a short string containing full_moon day
@@ -284,15 +286,15 @@ def print_year_calendar(city, year, begweek=0):
   head = '+' + ((('-'*(_col_width+1))+'+')*3)
   header = week_header(_day_width, begweek)
 
-  print >> fout, head
+  print(head, file=fout)
 
   # |          -          | 2011 Mumbai, India  |          -          |
-  format_3_column('-', `year` + ' ' + city.name, '-')
+  format_3_column('-', repr(year) + ' ' + city.name, '-')
 
   for q in range(January, January+12, 3):
 
     ### Print month header, (23, 23, 23) wide columns.
-    print >> fout, head
+    print(head, file=fout)
 
     # |       January       |      February       |        March        |
     # |Su Mo Tu We Th Fr Sa |Su Mo Tu We Th Fr Sa |Su Mo Tu We Th Fr Sa |
@@ -322,15 +324,15 @@ def print_year_calendar(city, year, begweek=0):
 
     # print each line 0..height-1
     for i in range(height):
-      print >> fout, _col_pad,
+      print(_col_pad, end=' ', file=fout)
       for cal in data:
         if i >= len(cal):
           # blank fill the empty week in a month
-          print >> fout, ' '*(_col_width-1),
+          print(' '*(_col_width-1), end=' ', file=fout)
         else:
           print_week(cal[i], _day_width)
-        print >> fout, _col_pad,
-      print >> fout
+        print(_col_pad, end=' ', file=fout)
+      print(file=fout)
 
     # Moon sunrise sunset info for city for 3 months, eg.
     # |M:19 Sun:07:11-18:12 |M:18 Sun:07:12-18:31 |M:19 Sun:06:58-18:44 |
@@ -341,7 +343,7 @@ def print_year_calendar(city, year, begweek=0):
       monthly_ephem(city, year, q+1),
       monthly_ephem(city, year, q+2))
 
-  print >> fout, head
+  print(head, file=fout)
 
 def edate_rounded(edate):
   year, month, day = edate.triple()
@@ -364,12 +366,12 @@ def read_events(event_filename):
     # YYYY/MM/DD or M/D
     if re.match('(\d{4}/)?\d{2}/\d{2}', date):
       # TODO: validate the date
-      if events.has_key(date):
+      if date in events:
         events[date] += ',' + event
       else:
         events[date] = event
     else:
-      print "Cannot parse date ", date
+      print("Cannot parse date ", date)
       sys.exit(1)
     # print '"%s" -- "%s"' % (date, events[date])
   fin.close()
@@ -411,8 +413,8 @@ def full_moon_from_to(start_date, end_date):
   next_day = datetime.timedelta(days=1)
   while date < end_date:
       fm = ephem.next_full_moon(date).datetime()
-      print "full moon on %04d-%02d-%02d" % (
-        fm.year, fm.month, fm.day)
+      print("full moon on %04d-%02d-%02d" % (
+        fm.year, fm.month, fm.day))
       date = fm + next_day
 
 def ephem_one_day(city, date):
@@ -444,18 +446,18 @@ def calendar_from_to(city, start_date, end_date, braces):
     # new month or new year?
     if braces and (date.day == 1 or line == 1):
       if line > 1:
-        print "}}}", yesterday.strftime("%b")
+        print("}}}", yesterday.strftime("%b"))
       else:
-        print "# Calendar for %s from %s-%s-%s to %s-%s-%s" % (
+        print("# Calendar for %s from %s-%s-%s to %s-%s-%s" % (
           city.name,
           start_date.year, start_date.month, start_date.day,
-          end_date.year, end_date.month, end_date.day)
+          end_date.year, end_date.month, end_date.day))
       # new year?
       if date.month == 1:
-        if line > 1: print "}}}", yesterday.strftime("%Y")
-        print date.strftime("%Y"), "{{{"
+        if line > 1: print("}}}", yesterday.strftime("%Y"))
+        print(date.strftime("%Y"), "{{{")
       # new month?
-      print date.strftime("%b %Y"), "{{{"
+      print(date.strftime("%b %Y"), "{{{")
 
     # Get and print the data for city
     (sunrise, sunset, moon_phase, moon_fm) = ephem_one_day(city, date)
@@ -468,28 +470,27 @@ def calendar_from_to(city, start_date, end_date, braces):
       moonx = "%2d" % moon_phase
 
 
-    print '%04d-%02d-%02d %3s M:%2s SR:%02d:%02d SS:%02d:%02d' % (
+    print('%04d-%02d-%02d %3s M:%2s SR:%02d:%02d SS:%02d:%02d' % (
       date.year, date.month, date.day, weekday,
       moonx,
       sunrise.hour, sunrise.minute,
       sunset.hour, sunset.minute
-      )
+      ))
 
     date += next_day
   if braces:
-    print "}}}\n# vim:fdm=marker:fen: "
+    print("}}}\n# vim:fdm=marker:fen: ")
 
 def get_timezone(tzname):
   try:
     return pytz.timezone(tzname)
-  except pytz.UnknownTimeZoneError,zone:
-    print "UnknownTimeZoneError",zone
+  except pytz.UnknownTimeZoneError as zone:
+    print("UnknownTimeZoneError",zone)
     if re.match('^/', tzname):
-      maybe_tz = filter(lambda x: re.search(tzname[1:],x, re.IGNORECASE),
-        pytz.all_timezones)
-      print 'Matching timezones are: ', maybe_tz
+      maybe_tz = [x for x in pytz.all_timezones if re.search(tzname[1:],x, re.IGNORECASE)]
+      print('Matching timezones are: ', maybe_tz)
     else:
-      print 'See pytz.all_timezones, supply /regexp, eg. /US'
+      print('See pytz.all_timezones, supply /regexp, eg. /US')
     sys.exit(1)
 
 class city_info(ephem.Observer): # Observer + { name, pytz }
@@ -498,7 +499,7 @@ class city_info(ephem.Observer): # Observer + { name, pytz }
 
 def get_city(city):
   "Return city_info object"
-  if  cities.locations.has_key(city):
+  if  city in cities.locations:
     city = cities.locations[city]
 
   city = re.sub( r'\s+','', city) # trim all spaces
@@ -512,10 +513,10 @@ def get_city(city):
       obj.name, obj.lat, obj.long, obj.elev, obj.pytz.zone)
     return obj
 
-  print ValueError, "Unknown city: '" + city + """'
+  print(ValueError, "Unknown city: '" + city + """'
     Location format is 'City Name;Latitude;Longitude;Elevation;TimeZone'
     Examples: 'Accra;5;0;0;Africa/Accra' or 'SF;37;-122;30;US/Pacific'
-    """
+    """)
   exit(1)
 
 
@@ -537,14 +538,14 @@ if __name__ == '__main__':
     elif opt[0] == '-s': edate1 = ephem.Date(opt[1])
     elif opt[0] == '-e': edate2 = ephem.Date(opt[1])
     elif opt[0] == '-f': opt_file = opt[1]
-    elif opt[0] == '-W': opt_width = string.atoi(opt[1])
-    elif opt[0] == '-H': opt_height = string.atoi(opt[1])
+    elif opt[0] == '-W': opt_width = int(opt[1])
+    elif opt[0] == '-H': opt_height = int(opt[1])
     elif opt[0] == '-E': read_events(opt[1])
     elif opt[0] == '-S': subtitle = opt[1]
-    elif opt[0] == '-D': days_delta = string.atoi(opt[1])
+    elif opt[0] == '-D': days_delta = int(opt[1])
 
   if opt_help or not opt_style :
-    print USAGE
+    print(USAGE)
     sys.exit(0)
 
   # Default location and time
@@ -591,28 +592,28 @@ if __name__ == '__main__':
 
   # Print yearly calendar
   if opt_style == 'yearly' or opt_style == 'all':
-    print >> fout, 'Planetary Calendar for %s from %s' % (city.name, date_out)
-    print >> fout, city.description
-    print >> fout
+    print('Planetary Calendar for %s from %s' % (city.name, date_out), file=fout)
+    print(city.description, file=fout)
+    print(file=fout)
     for year in range(start_date.year, end_date.year+1):
       warn('Generating yearly calendar for %04d, where M:next_full_moon.day' % (year))
       print_year_calendar(city, year)
-      print >> fout, "\f"
+      print("\f", file=fout)
 
   # Print monthly calendar
   if opt_style == 'monthly' or opt_style == 'all':
-    print >> fout, 'Planetary Calendar for %s from %s' % (city.name, date_out)
-    print >> fout, city.description
-    print >> fout
+    print('Planetary Calendar for %s from %s' % (city.name, date_out), file=fout)
+    print(city.description, file=fout)
+    print(file=fout)
     for year in range(start_date.year, end_date.year+1):
       for month in range(1, 12+1):
         edate3 = ephem.Date("%04d/%02d/%02d" % (year, month, 1))
         if edate1 <= edate3 <= edate2:
-          warn('Generating monthly calendar for %04d-%02d' % (year, month))
+          warn_cr('Generating monthly calendar for %04d-%02d' % (year, month))
           print_month(city, year, month, 0, opt_width, opt_height)
-          print >> fout, "\f"
+          print("\f", file=fout)
 
-  print >> fout, "GPL(C) moshahmed/at/gmail, ephem3.py vim:nowrap:"
+  print("GPL(C) moshahmed/at/gmail, ephem3.py vim:nowrap:", file=fout)
   if opt_file:
     fout.close()
     warn('Wrote %s' % opt_file)
