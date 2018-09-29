@@ -1,8 +1,8 @@
-# What: Awesome pdf calendar generator
+# What: caly - generate 6 month /page pdf calendar
 # From http://www.mechanicalcat.net/richard/log/Python/Year_planner_PDF_generation_in_Python
 # Dependency on reportlab pdf package
 #    http://www.reportlab.com/software/opensource/rl-toolkit/download/
-#    => reportlab-2.5.win32-py2.5.exe.gz
+#    => c:/org/lang/python/reportlab-2.5.win32-py2.5.exe.gz
 
 # rlcal.py v1.1 (C) 2005 Richard Jones
 #   Generates 2 PDF pages for a "year planner".
@@ -16,6 +16,7 @@ import datetime
 import ephem, ephem3
 from reportlab.lib import colors
 from reportlab.graphics import shapes, renderPDF
+from reportlab.graphics.charts.textlabels import Label
 
 # call calendar to calculate the days for each month
 def get_months(year, startmon):
@@ -31,8 +32,8 @@ def get_months(year, startmon):
     mons.append(mdays)
   return reqd, mons
 
-def half_year(city, year, startmon):
-    '''"startmon" gives the 1-indexed month to start the page on'''
+def half_year(title,city, year, startmon):
+    '''startmon is the 1-indexed month to start the page on'''
     reqd, mons = get_months(year, startmon)
 
     LEFTMARGIN  = 5
@@ -44,6 +45,13 @@ def half_year(city, year, startmon):
     HEIGHT = reqd * CELLHEIGHT + TOPROWHEIGHT
 
     d = shapes.Drawing(WIDTH, HEIGHT)
+
+    lab = Label()
+    lab.setOrigin(LEFTMARGIN,HEIGHT)
+    lab.boxAnchor = 'nw'
+    lab.setText(title)
+    lab.fontName = 'Times-Bold'
+    d.add(lab)
 
     # Month headings
     for i in range(6):
@@ -90,15 +98,25 @@ def half_year(city, year, startmon):
     return d
 
 if __name__ == '__main__':
-    if len(sys.argv)>2:
-      city_name = sys.argv[1]
-      year = int(sys.argv[2])
-    else:
+    if len(sys.argv)<3:
+      print("Usage: ", sys.argv[0], " city_name year outdir")
+      sys.exit(1)
+
+    # == Example:
       # today = datetime.datetime.date(datetime.datetime.now())
       # year = today.year
       # city_name = 'Accra'
-      print("Usage: ", sys.argv[0], " city_name year")
-      sys.exit(1)
+    city_name = sys.argv[1]
+    year = int(sys.argv[2])
+    outdir= sys.argv[3]
+    city = ephem3.get_city(city_name)
+    title = '%s %s' % (city_name, year)
+
+    for startmon in [1,7]:
+      outfile= ('%s'+'%s-%04d-%02d-%02d.pdf') % (
+          outdir,city_name.lower(),year,startmon,startmon+6-1)
+      print(("Writing %s" % (outfile)))
+      renderPDF.drawToFile(half_year(title,city, year, startmon), outfile)
 
     city = ephem3.get_city(city_name)
     outdir='out'

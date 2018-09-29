@@ -6,6 +6,7 @@ locations = {
   #"Location" : 'City      , Country ; Latitude  ; Longitude   ; Elevation ; Time   / Zone  '   ,
   "Accra"     : 'Accra     , Ghana   ; 5.5701389 ; -0.17819444 ; 20        ; Africa / Accra'    ,
   "Sunnyvale" : 'Sunnyvale , USA     ; 37.3689   ; -122.0353   ; 10        ; US     / Pacific'  ,
+  "SanMateo"  : 'SanMateo  , USA     ; 37.5448   ; -122.2966   ; 15        ; US     / Pacific'  ,
   "Mumbai"    : 'Mumbai    , India   ; 18.977707 ; 72.822960   ; 21        ; Asia   / Calcutta' ,
   "Mangalore" : 'Mangalore , India   ; 12.887261 ; 75.412277   ; 20        ; Asia   / Calcutta' ,
   "Kigali"    : 'Kigali    , Rwanda  ; -1.94629  ; +30.10313   ; 1426      ; Africa / Kigali'   ,

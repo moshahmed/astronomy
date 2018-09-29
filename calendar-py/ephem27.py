@@ -1,7 +1,7 @@
-#!C:/Python25/python
+#!C:/Python27/python
 # What: Print calendar with full moon, sunrise, sunset for 1st of each month.
 # From http://www.mannyjuan.com/calend2.txt
-# Ephem integration GPL(C) mosh moshahmed/at/gmail
+# Ephem integration GPL(C) moshahmed/at/gmail
 # $Header: c:/cvs/repo/mosh/calendar/ephem27.py,v 1.34 2018/09/09 00:33:13 User Exp $
 
 USAGE = """USAGE:
