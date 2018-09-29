@@ -1,0 +1,34 @@
+C:\> sh pscal.sh -h
+Pscal is a PostScript program to print calendars.
+
+Usage: pscal [-hmnRrv] [-d diameter] [-eFf font] [-L language] [month [year]]
+Options:
+  -d  moon diameter (default = 13)
+  -e  event font (default = Times-Roman)
+  -F  title font (default = Times-Bold)
+  -f  day font (default = Helvetica-Bold)
+  -h  help message
+  -L  language (default = English)
+  -M  show moon phases (southern hemisphere)
+  -m  show moon phases (northern hemisphere)
+  -n  show day numbering
+  -R  don't rotate (portrait)
+  -r  rotate by 90 degrees (landscape)
+  -S  European style (Monday first)
+  -s  American style (Sunday first)
+  -v  version number
+
+Example:
+  1> sh pscal.sh -d 4 -m 1 2003  > cal-01-03.ps
+  2> gs cal-01-03.ps
+  OR ps2pdf cal-01-03.ps cal-01-03.pdf
+  3> pscal  `date +"%m %Y"`  > cal-`date +"%m-%Y"`
+  4> for y in 2003 ;do
+       for m in {01..12} ;do
+         pscal -d 4 -m $m $y > cal-$m-$y.ps
+       done
+     done
+  5> ls -l cal-*
+
+Related software:
+  http://pcal.sourceforge.net/  (added 2017-02-23)
